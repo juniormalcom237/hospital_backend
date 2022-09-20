@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  price      Int      @default(999)
+  createdAt  DateTime @default(now())
+  Category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model User {
+  userId       Int                @id @default(autoincrement())
+  name         String
+  surname      String
+  email        String             @unique
+  password     String
+  telephone    String
+  country      String
+  status       Boolean
+  Patient      Patient[]
+  message      Messages[]
+  pills        Pills[]
+  reminder     MedicineReminder[]
+  Doctor       Doctor[]
+  notification Notification[]
+}
+
+model Patient {
+  patientId   Int           @id @default(autoincrement())
+  bloodGroup  String
+  user        User          @relation(fields: [userID], references: [userId])
+  userID      Int
+  appointment Appointment[]
+}
+
+model Doctor {
+  doctorID   Int    @id @default(autoincrement())
+  studies    String
+  practicing String
+
+  Department       Department?   @relation(fields: [departmentDeptId], references: [deptId])
+  departmentDeptId Int?
+  appointment      Appointment[]
+  User             User?         @relation(fields: [userUserId], references: [userId])
+  userUserId       Int?
+}
+
+model Department {
+  deptId   Int      @id @default(autoincrement())
+  deptName String
+  doctor   Doctor[]
+}
+
+model Messages {
+  messageId Int      @id @default(autoincrement())
+  date      DateTime
+  recievers Int
+
+  User       User? @relation(fields: [userUserId], references: [userId])
+  userUserId Int?
+}
+
+model Appointment {
+  appointmentId Int      @id @default(autoincrement())
+  name          String
+  time          DateTime
+  Date          DateTime
+  status        Boolean
+
+  Patient          Patient? @relation(fields: [patientPatientId], references: [patientId])
+  patientPatientId Int?
+  Doctor           Doctor?  @relation(fields: [doctorDoctorID], references: [doctorID])
+  doctorDoctorID   Int?
+}
+
+model Files {
+  fileID    Int    @id @default(autoincrement())
+  type      String
+  extension String
+  size      String
+
+  Folder         Folder? @relation(fields: [folderFolderId], references: [folderId])
+  folderFolderId Int?
+}
+
+model Folder {
+  folderId  Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime
+  file      Files[]
+}
+
+model Symptoms {
+  symID                        Int            @id @default(autoincrement())
+  name                         String
+  MedicalRecord                MedicalRecord? @relation(fields: [medicalRecordMedicalRecordId], references: [medicalRecordId])
+  medicalRecordMedicalRecordId Int?
+}
+
+model MedicalRecord {
+  medicalRecordId Int            @id @default(autoincrement())
+  symptoms        Symptoms[]
+  diagnosis       Diagnosis[]
+  prescription    Prescription[]
+  visiteNotes     String
+}
+
+model Prescription {
+  prescriptionId Int          @id @default(autoincrement())
+  medication     Medication[]
+
+  MedicalRecord                MedicalRecord? @relation(fields: [medicalRecordMedicalRecordId], references: [medicalRecordId])
+  medicalRecordMedicalRecordId Int?
+}
+
+model Medication {
+  medicalRecordId            Int           @id @default(autoincrement())
+  name                       String
+  dosage                     String
+  timeOfEating               String
+  route                      String
+  frequency                  String
+  duration                   DateTime
+  dispense                   String
+  firstInTake                String
+  Interval                   String
+  comment                    String
+  Prescription               Prescription? @relation(fields: [prescriptionPrescriptionId], references: [prescriptionId])
+  prescriptionPrescriptionId Int?
+}
+
+model Diagnosis {
+  DiagnoseID                   Int            @id @default(autoincrement())
+  name                         String
+  MedicalRecord                MedicalRecord? @relation(fields: [medicalRecordMedicalRecordId], references: [medicalRecordId])
+  medicalRecordMedicalRecordId Int?
+}
+
+model Pills {
+  pills   Int    @id @default(autoincrement())
+  name    String
+  amount  String
+  howLong String
+  days    String
+
+  MedicineForm                    MedicineForm?     @relation(fields: [medicineFormMedicalRecordId], references: [medicalRecordId])
+  medicineFormMedicalRecordId     Int?
+  MedicineReminder                MedicineReminder? @relation(fields: [medicineReminderMedicalRecordId], references: [medicalRecordId])
+  medicineReminderMedicalRecordId Int?
+  User                            User?             @relation(fields: [userUserId], references: [userId])
+  userUserId                      Int?
+}
+
+model MedicineForm {
+  medicalRecordId Int     @id @default(autoincrement())
+  icon            String
+  name            String
+  pills           Pills[]
+}
+
+model MedicineReminder {
+  medicalRecordId Int      @id @default(autoincrement())
+  pills           Pills[]
+  Time            DateTime
+  User            User?    @relation(fields: [userUserId], references: [userId])
+  userUserId      Int?
+}
+
+model Notification {
+  NotificationID Int @id @default(autoincrement())
+
+  recievers  Int
+  sender     Int
+  User       User? @relation(fields: [userUserId], references: [userId])
+  userUserId Int?
+}
